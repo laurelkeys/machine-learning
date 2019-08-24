@@ -24861,7 +24861,6 @@ date_time,hour,holiday,temp,rain_1h,clouds_all,weather_main,traffic_volume
 2016-07-11 14:00:00,14,None,300.18,0.0,90,Clouds,4456
 2016-07-11 15:00:00,15,None,300.81,0.0,75,Thunderstorm,4858
 2016-07-11 16:00:00,16,None,301.48,0.0,75,Thunderstorm,5934
-2016-07-11 17:00:00,17,None,302.11,9831.3,75,Rain,5535
 2016-07-11 18:00:00,18,None,302.54,0.0,75,Thunderstorm,3900
 2016-07-11 19:00:00,19,None,302.39,0.0,75,Clouds,2856
 2016-07-11 20:00:00,20,None,302.45,0.0,75,Thunderstorm,2506
