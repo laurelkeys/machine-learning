@@ -1,3 +1,7 @@
+# Assignment 2
+assignment-2/mini_cinic10/images
+assignment-2/mini_cinic10/*.npz
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
