@@ -33,6 +33,7 @@ class Layer:
         self.z = np.array([]) # prev_layer.a @ self.W + self.b
         self.a = np.array([]) # self.activation(self.z)
         self.delta = np.array([])
+        self.delta_weights = np.array([])
 
     def initialize_weights(self, W=np.array([]), b=np.array([])):
         if self.previous_layer != None: # if not first layer
@@ -69,17 +70,23 @@ class Layer:
         self.z = self.previous_layer.a @ self.W + self.b
         self.a = self.activation(self.z)
     
-    # receives the derivative of J w.r.t. the next layer's of the current layer
-    # returns the derivative of the cost function w.r.t. activation value of the current layer
-    # def backprop(self, last_delta):
-    #     if last_delta == None: # output layer
-    #         self.delta = (errors * self.activation.derivative( results[-1] ))
-    #         result = [ results[-2].dot(deltas[0].T) ]
+    def backprop(self):
+        print("yo")
+        assert(self.a.any()) # the feed foward has not been run
+        if self.next_layer == None: # output layer
+            errors = self.a - self.expected_results
+            self.delta = (errors * self.activation.derivative( self.a ))
+            self.delta_weights = (self.previous_layer.a).dot(self.delta.T)
 
-    #     else: # hidden layer
-    #         delta = last_delta * self.g_prime(self.z) # self.g_prime(self.z)
-    #         delta = delta * self.g_prime()
-    #     return delta
+            print( "errors", errors.shape)
+            print( "delta", self.delta.shape)
+            print( "delta_weights", self.delta_weights.shape)
+
+        else: # hidden layer
+            print( "W",self.W.shape )
+            print( "delta",self.next_layer.delta.shape )
+            self.delta = (self.next_layer.delta @ self.W) * self.activation.derivative(self.z)
+            self.delta_weights = self.a @ self.delta
 
 
 
@@ -106,15 +113,12 @@ class NN:
             self.layers[l].feedforward()
         y_pred = self.layers[L-1].a # output
         return y_pred
-
-
-        
-
-def forward(INPUT, weights, biases, activation_function):
-    results = [INPUT]
-    for weight, bias in zip(weights, biases):
-        results.append( activation_function( (results[-1] @ weight) + bias ) )
-    return results
+    
+    def back_propagation(self, Y):
+        L = len(self.layers)-1
+        self.layers[L].expected_results = Y # desired output
+        for l in range(L, 0, -1):
+            self.layers[l].backprop()
 
 
 weights1 = np.array(
@@ -150,6 +154,7 @@ fwd = net.feed_forward(input)
 for l in net.layers:
     print(l.a)
 print("fwd",fwd)
+print()
 
 
 results_correct = [ 
@@ -158,9 +163,12 @@ results_correct = [
             [0.75136507,  0.772928465] ]
 
 
-# bwd = backward(results_correct, WEIGHTS, output, logistic_derivative)
-# print("bwd\n",bwd)
+net.back_propagation(results_correct[-1])
+for l in net.layers[1:]:
+    print("delta",l.delta)
+    print("delta_weights",l.delta_weights)
+    print()
 
-# print( "\nnew weights 2 (output layer)\n", weights2 - (0.5 * bwd[0].T) )
-# print( "\nnew weights 1 (hidden layer)\n", weights1 - (0.5 * bwd[1].T) )
+print( "\nnew weights 2 (output layer)\n", weights2 - (0.5 * net.layers[2].delta_weights.T) )
+print( "\nnew weights 1 (hidden layer)\n", weights1 - (0.5 * net.layers[1].delta_weights.T) )
 # print()
