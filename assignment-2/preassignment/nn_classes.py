@@ -11,7 +11,7 @@ class Sigmoid(ActivationFunction):
     def __call__(self, Z):
         return 1 / (1 + np.exp(-Z))
     def derivative(self, A):
-        return A * (1 - A) # Sigmoid(Z) * (1 - Sigmoid(Z))
+        return A * (1 - A)
 
 ### Costs
 class CostFunction:
@@ -24,16 +24,31 @@ class CrossEntropy(CostFunction):
     def __call__(self, Y, Ypred):
         return np.mean( -(Y * np.log(Ypred)).sum(axis=1) )
     def derivative(self, Y, Ypred):
-        # FIXME
         raise NotImplementedError
-        #return Y / Ypred
-        #return (Ypred - Y) / Ypred.shape[0]
 
 class MSE(CostFunction):
     def __call__(self, Y, Ypred):
         return (Y - Ypred) ** 2
     def derivative(self, Y, Ypred):
         return (Y - Ypred)
+
+### Optimizers
+class Optimizer:
+    def __init__(self, batch_size, learning_rate):
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
+
+    def optimize(self, layers):
+        raise NotImplementedError
+
+class GD:
+    def __init__(self, batch_size, learning_rate):
+        super().__init__(batch_size, learning_rate)
+
+    def optimize(self, layers):
+        for layer in layers[1:]:
+            layer.W -= layer.delta_weights * self.learning_rate
+            layer.b -= layer.delta_biases  * self.learning_rate
 
 ### Layers
 class Layer:
@@ -53,8 +68,12 @@ class Layer:
         # activation values shape=(output_size, 1)
         self.z = np.array([]) # prev_layer.a @ self.W + self.b
         self.a = np.array([]) # self.activation(self.z)
+
         self.delta = np.array([])
         self.delta_weights = np.array([])
+        self.delta_biases = np.array([])
+
+        self.last_delta_weights = np.array([])
 
         self.errors = np.array([])
 
@@ -99,24 +118,27 @@ class Layer:
     def backprop(self):
         assert(self.a.any()) # the feed foward has not been run
 
+        self.last_delta_weights = self.delta_weights
+
         if self.next_layer == None: # output layer
             self.delta = (self.errors * self.activation.derivative( self.a ))
-            self.delta_weights = (self.previous_layer.a).dot(self.delta.T)
+            self.delta_weights = self.previous_layer.a @ self.delta.T
+            self.delta_biases = self.delta.sum(axis=0)
+
         else: # hidden layer
             self.delta = (self.next_layer.delta @ self.W) * self.activation.derivative(self.z)
             self.delta_weights = self.a @ self.delta
-    
-    def __update_params(self, learning_rate):
-        self.W -= learning_rate * self.dW
-        self.b -= learning_rate * self.db
+            self.delta_biases = self.delta.sum(axis=0)
+
 
 
 
 ### Neural Net
 class NN:
-    def __init__(self, cost_function):#, cost_function, cost_function_derivative):
+    def __init__(self, cost_function, optimizer):#, cost_function, cost_function_derivative):
         self.layers = []
         self.cost_function = cost_function
+        self.optimizer = optimizer
     
     def add_layer(self, layer):
         self.layers.append(layer)
@@ -147,21 +169,27 @@ class NN:
         self.layers[L].calculate_error(self.cost_function, Y) # set errors for last layer
         for l in range(L, 0, -1):
             self.layers[l].backprop()
+    
+    def get_batches(self, X, batch_size):
+        return X
 
-    def train(self, optimizer):
-        raise NotImplementedError
+    def train(self, batch_size, epochs, X, Y):
+        for epoch in range(epochs):
+            np.random.shuffle(X)
+            for batch in self.get_batches(X, batch_size):
+                self.feed_forward(X)
+                self.back_propagation(Y)
+                self.optimizer.optimize(self.layers)
 
 
 weights1 = np.array(
            [[.15, .20],
             [.25, .30]])
-
 weights2 = np.array(
            [[.40, .45],
             [.50, .55]])
 
 WEIGHTS = np.array([weights1, weights2])
-
 biases = np.array(
          [[.35, .35],
           [.60, .60]])
@@ -174,9 +202,8 @@ fwd_correct = [
             [0.593269992, 0.596884378],
             [0.75136507,  0.772928465] ]
 
-
 # Init nn
-net = NN( MSE() )
+net = NN( MSE(), GD() )
 net.add_layer( Layer(Sigmoid(), 2) )
 net.add_layer( Layer(Sigmoid(), 2) )
 net.add_layer( Layer(Sigmoid(), 2) )
@@ -191,7 +218,7 @@ net.print_net()
 fwd = net.feed_forward(input)
 for l in net.layers:
     print(l.a)
-print()
+    print()
 
 # Back-prop
 net.back_propagation(fwd_correct[-1])
