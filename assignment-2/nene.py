@@ -252,7 +252,7 @@ class NN:
             X, Y = self.__shuffle_X_Y(X, Y)
         return zip(np.array_split(X, n_batches), np.array_split(Y, n_batches))
         # for i in range(n_batches):
-        #     yield (X[batch_size*i : batch_size*(i+1)], 
+        #     yield (X[batch_size*i : batch_size*(i+1)],
         #            Y[batch_size*i : batch_size*(i+1)])
         # return
     
@@ -261,26 +261,19 @@ class NN:
         ''' X_test.shape == (n_test_samples, self.layers[0].input_size)
             Y_test.shape == (n_test_samples, self.layers[-1].output_size)
         '''
-        __start = time()
         assert(X_test.shape[0] == Y_test.shape[0])
         assert(X_test.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
         assert(Y_test.shape[1] == self.layers[-1].output_size)
-        print(f"assert done: {time() - __start:.2f}")
         
         # loss/cost value for the training set
         Ypred = self.feedforward(X_test)
-        print(f"Ypred done: {time() - __start:.2f}")
         cost = self.J(Y_test, Ypred)
-        print(f"cost done: {time() - __start:.2f}")
         
         # calculates the values not as one-hot encoded row vectors
         target = np.argmax(Y_test, axis=1)
-        print(f"target done: {time() - __start:.2f}")
         prediction = np.argmax(Ypred, axis=1)
-        print(f"target done: {time() - __start:.2f}")
         accuracy = (prediction == target).mean()
-        print(f"accuracy done: {time() - __start:.2f}\n")     
-        
+
         return cost, accuracy
     
     # trainning and validation data
@@ -309,7 +302,7 @@ class NN:
         assert(Y_val.shape[1] == self.layers[-1].output_size)
         
         n_training_samples = X.shape[0]
-        batches_per_epoch = int(np.ceil(n_training_samples / batch_size)) # same as the number of iterations per epoch
+        batches_per_epoch = int(np.ceil(n_training_samples / batch_size)) # equal to the number of iterations per epoch
         
         for epoch in range(n_epochs):
             if verbose:
@@ -329,12 +322,10 @@ class NN:
                 if verbose:
                     print(f"batch ({batch_number}/{batches_per_epoch})", end='\r')
                     batch_number += 1
-            print(f"done with batches: {time() - start_time:.2f}s")
             
             # calculate the loss/cost value for this epoch
             epoch_cost, epoch_accuracy = self.evaluate(X, Y) # training set
             epoch_cost_val, epoch_accuracy_val = self.evaluate(X_val, Y_val) # validation set
-            print(f"done with evaluation: {time() - start_time:.2f}s")
             self.history["loss"].append(epoch_cost)
             self.history["loss_val"].append(epoch_cost_val)
             self.history["acc"].append(epoch_accuracy)
