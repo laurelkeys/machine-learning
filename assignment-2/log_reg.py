@@ -80,16 +80,16 @@ nn2_log_reg = NN(
 start = time()
 print("Starting to train...")
 nn2_log_reg.train(
-    X, Y,
+    X[:4*2048], Y[:4*2048],
     X_val, Y_val,
-    n_epochs=64,
+    n_epochs=2,
     batch_size=1024
 ) # X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True
 end = time()
 
-print(f"Training took {end - start}s")
+print(f"\nDone. Training took {end - start}s")
 
-print(f"Train history:")
+print(f"\nTrain history:")
 for k, v in nn2_log_reg.history.items():
-    print(f"[{k}]: \n{v}")
+    print(f"{k}: {v}")
 
