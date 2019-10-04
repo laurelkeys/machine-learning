@@ -2,6 +2,7 @@ import numpy as np
 
 import warnings
 from time import time
+from deprecated import deprecated
 
 # RANDOM_SEED = 886
 
@@ -188,6 +189,7 @@ class Layer:
     
     # receives the derivative of the cost function w.r.t. the activation values of the current layer (i.e. next layer's input)
     # returns the derivative of the cost function w.r.t. the activation values of the previous layer (i.e. this layer's input)
+    @deprecated("This function receives dA as an input, use 'backprop' instead which receives dZ and stores dX")
     def _backprop(self, dA):
         ''' dA.shape == (n_examples, self.output_size)
         
@@ -268,6 +270,24 @@ class NN:
             self.layers[l].feedforward(self.layers[l-1].A)
         Ypred = self.layers[-1].A # output
         return Ypred
+
+    @deprecated("This function calls an old version of backpropagation from the Layer class, use 'backprop' instead")
+    def _backprop(self, X, Y, Ypred):
+        ''' X.shape     == (n_examples, self.layers[0].input_size)
+            Y.shape     == (n_examples, self.layers[-1].output_size)
+            Ypred.shape == (n_examples, self.layers[-1].output_size)
+            where Ypred is the result of feedforward(X)
+            
+            Note that only calling backprop doesn't actually update the network parameters
+        '''
+        assert(X.shape[0] == Y.shape[0])
+        assert(X.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
+        assert(Y.shape[1] == self.layers[-1].output_size)
+        
+        cost_wrt_Ypred = self.J.derivative(Y, Ypred) # [dJ/dYpred]
+        dA = self.layers[-1]._backprop(cost_wrt_Ypred)
+        for l in reversed(range(1, len(self.layers) - 1)): # we don't do backprop on the input layer
+            dA = self.layers[l]._backprop(dA)
     
     def backprop(self, X, Y, Ypred):
         ''' X.shape     == (n_examples, self.layers[0].input_size)
@@ -285,7 +305,7 @@ class NN:
         self.layers[-1].backprop(dZ=delta)
         for l in reversed(range(1, len(self.layers) - 1)):
             # [dJ/dZ^l == dJ/dA^l . dA^l/dZ^l], note that dJ/dA^l is dJ/dX^{l+1}
-            delta = self.layers[l+1].dX * self.layers[l].g.derivative(self.Z) # delta^l == [dJ/dZ^l]
+            delta = self.layers[l+1].dX * self.layers[l].g.derivative(self.layers[l].Z) # delta^l == [dJ/dZ^l]
             self.layers[l].backprop(dZ=delta)
         
         # obs.: we don't backpropagate the input layer since we 
