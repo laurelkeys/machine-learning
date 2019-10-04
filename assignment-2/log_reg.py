@@ -50,7 +50,7 @@ Y_val = onehot_encode(ys_val)
 
 ###############################################################################
 
-def train_NN(nn, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True, use_old_backprop=False):
+def train_NN(nn, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True):
     start = time()
     print("Starting to train...")
     nn.train(
@@ -58,8 +58,7 @@ def train_NN(nn, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True, use_old
         X_val, Y_val,
         n_epochs,
         batch_size,
-        verbose,
-        use_old_backprop
+        verbose
     )
     end = time()
     print(f"\nDone.\nTraining took {(end - start):.2f}s")
@@ -72,12 +71,22 @@ n_epochs = 6
 batch_size = 80
 learning_rate = 1e-4
 
-softmax_regressor = NN(
+# softmax_regressor = NN(
+#     cost_function=CrossEntropy(),
+#     optimizer=GradientDescent(learning_rate),
+#     weight_initialization='xavier',
+#     layers=[
+#         Layer(3072, None), Layer(10, SoftMax())
+#     ])
+
+hidden_layer_size = 200
+
+nn = NN(
     cost_function=CrossEntropy(),
     optimizer=GradientDescent(learning_rate),
     weight_initialization='xavier',
     layers=[
-        Layer(3072, None), Layer(10, SoftMax())
+        Layer(3072, None), Layer(hidden_layer_size, Sigmoid()), Layer(10, SoftMax())
     ])
 
 train_NN(
@@ -85,5 +94,5 @@ train_NN(
     Y=Y, Y_val=Y_val,
     n_epochs=n_epochs,
     batch_size=batch_size,
-    nn=softmax_regressor
+    nn=nn
 )

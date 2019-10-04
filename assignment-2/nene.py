@@ -1,6 +1,5 @@
 import numpy as np
 
-import warnings
 from time import time
 
 # RANDOM_SEED = 886
@@ -66,7 +65,8 @@ class CostFunction:
             activation_function should be the last layer's g function, thus Ypred == activation_function(Z)
             and the value returned is the delta for the output layer of the network (delta^L == dJ/dZ^L)
         '''
-        return self.derivative(Y, Ypred) * activation_function.derivative(Z) # [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L]
+        # FIXME remove Z from parameters (we were wrongly calling activation_function.derivative(Z))
+        return self.derivative(Y, Ypred) * activation_function.derivative(Ypred) # [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L]
         # obs.: Ypred == A^L == g(Z^L), thus dYpred/dZ^L == dA^L/dZ^L == g'(Z^L)
         #       [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L == dJ/dA^L . dA^L/dZ^L]
 
@@ -189,24 +189,6 @@ class Layer:
         self.A = self.g(self.Z)
         return self.A
     
-    # receives the derivative of the cost function w.r.t. the activation values of the current layer (i.e. next layer's input)
-    # returns the derivative of the cost function w.r.t. the activation values of the previous layer (i.e. this layer's input)
-#    @deprecated("This function receives dA as an input, use 'backprop' instead which receives dZ and stores dX")
-    def _backprop(self, dA):
-        ''' dA.shape == (n_examples, self.output_size)
-        
-            Note that only calling backprop doesn't actually update the layer parameters
-        '''
-        assert(dA.shape[1] == self.output_size)        
-        # (n_examples, output_size) = (n_examples, output_size) * (n_examples, output_size)
-        # (input_size, output_size) = (input_size, n_examples)  @ (n_examples, output_size)
-        # (output_size, )           = (n_examples, output_size).sum(axis=0)
-        # (n_examples, input_size)  = (n_examples, output_size) @ (output_size, input_size), input_size==prev_layer.output_size
-        delta = dA * self.g.derivative(self.Z) # [dJ/dZ = dJ/dA . dA/dZ]
-        self.dW = (self.X).T @ delta           # [dJ/dW = dJ/dZ . dZ/dX]
-        self.db = delta.sum(axis=0)            # [dJ/db = dJ/dZ . dZ/db]
-        return delta @ (self.W).T              # [dJ/dX = dJ/dZ . dZ/dX], note that dJ/dX is dA for the previous layer
-    
     # receives the derivative of the cost function w.r.t. the Z value of the current layer [dJ/dZ = dJ/dA . dA/dZ]
     # returns the derivative of the cost function w.r.t. the A value of the previous layer [dJ/dX = dJ/dZ . dZ/dX]
     # obs.: the A value of the previous layer is this layer's input value X
@@ -270,25 +252,6 @@ class NN:
             self.layers[l].feedforward(self.layers[l-1].A)
         Ypred = self.layers[-1].A # output
         return Ypred
-
-#    @deprecated("This function calls an old version of backpropagation from the Layer class, use 'backprop' instead")
-    def _backprop(self, X, Y, Ypred):
-        ''' X.shape     == (n_examples, self.layers[0].input_size)
-            Y.shape     == (n_examples, self.layers[-1].output_size)
-            Ypred.shape == (n_examples, self.layers[-1].output_size)
-            where Ypred is the result of feedforward(X)
-            
-            Note that only calling backprop doesn't actually update the network parameters
-        '''
-        assert(X.shape[0] == Y.shape[0])
-        assert(X.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
-        assert(Y.shape[1] == self.layers[-1].output_size)
-        assert(Ypred.shape == Y.shape)
-        
-        cost_wrt_Ypred = self.J.derivative(Y, Ypred) # [dJ/dYpred]
-        dA = self.layers[-1]._backprop(cost_wrt_Ypred)
-        for l in reversed(range(1, len(self.layers) - 1)): # we don't do backprop on the input layer
-            dA = self.layers[l]._backprop(dA)
     
     def backprop(self, X, Y, Ypred):
         ''' X.shape     == (n_examples, self.layers[0].input_size)
@@ -307,7 +270,7 @@ class NN:
         self.layers[-1].backprop(dZ=delta)
         for l in reversed(range(1, len(self.layers) - 1)):
             # [dJ/dZ^l == dJ/dA^l . dA^l/dZ^l], note that dJ/dA^l is dJ/dX^{l+1}
-            delta = self.layers[l+1].dX * self.layers[l].g.derivative(self.layers[l].Z) # delta^l == [dJ/dZ^l]
+            delta = self.layers[l+1].dX * self.layers[l].g.derivative(self.layers[l].A) # delta^l == [dJ/dZ^l]
             self.layers[l].backprop(dZ=delta)
         
         # obs.: we don't backpropagate the input layer since we 
@@ -346,7 +309,7 @@ class NN:
         return cost, accuracy
     
     # training and validation data
-    def train(self, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True, use_old_backprop=False):
+    def train(self, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True):
         ''' X.shape == (n_training_samples, self.layers[0].input_size)
             Y.shape == (n_training_samples, self.layers[-1].output_size)
             
@@ -369,9 +332,6 @@ class NN:
         assert(X_val.shape[0] == Y_val.shape[0])
         assert(X_val.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
         assert(Y_val.shape[1] == self.layers[-1].output_size)
-
-        if use_old_backprop:
-            warnings.warn("\nThe old backprop implementation will soon be deleted, please set use_old_backprop=False")
         
         n_training_samples = X.shape[0]
         batches_per_epoch = int(np.ceil(n_training_samples / batch_size)) # equal to the number of iterations per epoch
@@ -386,11 +346,7 @@ class NN:
                 batch_Ypred = self.feedforward(batch_X)
                 
                 # sets the values of dW and db, used to then update the network parameters
-                if use_old_backprop:
-                    # FIXME TODO remove flag and old implementations
-                    self._backprop(batch_X, batch_Y, batch_Ypred)
-                else:
-                    self.backprop(batch_X, batch_Y, batch_Ypred)
+                self.backprop(batch_X, batch_Y, batch_Ypred)
                 
                 # updates each layer's parameters (i.e. weights and biases) with some flavor of gradient descent
                 self.optimizer.update(self.layers)
