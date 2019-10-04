@@ -48,35 +48,59 @@ class SoftMax(ActivationFunction):
 ###############################################################################
 
 class CostFunction:
-    ''' A CostFunction is applied to Y (the target values) and Ypred to get a scalar output
+    ''' A CostFunction is applied to Y (the target values) and Ypred (the predicted values) to get a scalar output
         Its derivative w.r.t. Ypred also expects Y and Ypred, but returns tensor (n_examples, last_layer_output_size)
         
-        obs.: Ypred is the last layer's activation values: last_layer.A == last_layer.g(last.layer.Z)
+        obs.: Ypred is the last layer's activation values: last_layer.A == last_layer.g(last.layer.Z), 
+              i.e. last_layer is the output layer of the network
     '''
     def __call__(self, Y, Ypred):
         ''' Y.shape == Ypred.shape == (n_examples, last_layer_output_size) '''
-        raise NotImplementedError # [J(Y, Ypred)]
+        raise NotImplementedError # [J(Y, Ypred) == J(Y, A^L)]
     def derivative(self, Y, Ypred):
         ''' Y.shape == Ypred.shape == (n_examples, last_layer_output_size) '''
-        raise NotImplementedError # [dJ/dYpred]
+        raise NotImplementedError # [dJ/dYpred == dJ/dA^L]
+    def deltaL(self, Y, Ypred, activation_function, Z):
+        ''' Y.shape == Ypred.shape == (n_examples, last_layer_output_size) 
+
+            activation_function should be the last layer's g function, thus Ypred == activation_function(Z)
+            and the value returned is the delta for the output layer of the network (delta^L == dJ/dZ^L)
+        '''
+        return self.derivative(Y, Ypred) * activation_function.derivative(Z) # [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L]
+        # obs.: Ypred == A^L == g(Z^L), thus dYpred/dZ^L == dA^L/dZ^L == g'(Z^L)
+        #       [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L == dJ/dA^L . dA^L/dZ^L]
 
 class CrossEntropy(CostFunction):
     def __call__(self, Y, Ypred, eps=1e-9):
-        return np.mean( -(Y * np.log(Ypred+eps)).sum(axis=1) ) ## == - (1/m) * (Y * np.log(Ypred)).sum(axis=(0, 1))
+        return np.mean( -(Y * np.log(Ypred+eps)).sum(axis=1) )
     def derivative(self, Y, Ypred, eps=1e-9):
         m = Ypred.shape[0]
         return - (Y / (Ypred+eps)) / m
+    def deltaL(self, Y, Ypred, activation_function, Z):
+        if isinstance(activation_function, SoftMax):
+            m = Ypred.shape[0]
+            # numerically stable
+            return (Ypred - Y) / m # (SoftMax(Z) - Y) / m
+        else:
+            return super().deltaL(Y, Ypred, activation_function, Z)
 
 class SoftmaxCrossEntropy(CostFunction):
-    def __call__(self, Y, Ypred, eps=0):
+    def __call__(self, Y, Ypred):
         exp = np.exp(Ypred - Ypred.max(axis=1, keepdims=True))
         Softmax = exp / np.sum(exp, axis=1, keepdims=True)
-        return np.mean( -(Y * np.log(Softmax+eps)).sum(axis=1) )
-    def derivative(self, Y, Ypred, eps=0):
+        return np.mean( -(Y * np.log(Softmax)).sum(axis=1) )
+    def derivative(self, Y, Ypred):
         exp = np.exp(Ypred - Ypred.max(axis=1, keepdims=True))
         Softmax = exp / np.sum(exp, axis=1, keepdims=True)
         m = Softmax.shape[0]
         return (Softmax - Y) / m
+    def deltaL(self, Y, Ypred, activation_function, Z):
+        if isinstance(activation_function, Linear):
+            # Linear.derivative(Z) is a matrix of ones, so 
+            # calling it doesn't change the returned value (it'd only take longer)
+            return self.derivative(Y, Ypred) # (SoftMax(Z) - Y) / m
+        else:
+            return super().deltaL(Y, Ypred, activation_function, Z)
 
 ###############################################################################
 
@@ -164,7 +188,7 @@ class Layer:
     
     # receives the derivative of the cost function w.r.t. the activation values of the current layer (i.e. next layer's input)
     # returns the derivative of the cost function w.r.t. the activation values of the previous layer (i.e. this layer's input)
-    def backprop(self, dA):
+    def _backprop(self, dA):
         ''' dA.shape == (n_examples, self.output_size)
         
             Note that only calling backprop doesn't actually update the layer parameters
@@ -178,6 +202,25 @@ class Layer:
         self.dW = (self.X).T @ delta           # [dJ/dW = dJ/dZ . dZ/dX]
         self.db = delta.sum(axis=0)            # [dJ/db = dJ/dZ . dZ/db]
         return delta @ (self.W).T              # [dJ/dX = dJ/dZ . dZ/dX], note that dJ/dX is dA for the previous layer
+    
+    # receives the derivative of the cost function w.r.t. the Z value of the current layer [dJ/dZ = dJ/dA . dA/dZ]
+    # returns the derivative of the cost function w.r.t. the A value of the previous layer [dJ/dX = dJ/dZ . dZ/dX]
+    # obs.: the A value of the previous layer is this layer's input value X
+    def backprop(self, dZ):
+        ''' dZ.shape == (n_examples, self.output_size)
+        
+            Note that only calling backprop doesn't actually update the layer parameters
+        '''
+        assert(dZ.shape[1] == self.output_size)
+        # (input_size, output_size) = (input_size, n_examples)  @ (n_examples, output_size)
+        # (output_size, )           = (n_examples, output_size).sum(axis=0)
+        # (n_examples, input_size)  = (n_examples, output_size) @ (output_size, input_size), input_size==prev_layer.output_size
+        self.dW = (self.X).T @ dZ           # [dJ/dW = dJ/dZ . dZ/dX]
+        self.db = dZ.sum(axis=0)            # [dJ/db = dJ/dZ . dZ/db]
+        self.dX = dZ @ (self.W).T           # [dJ/dX = dJ/dZ . dZ/dX]
+        return self.dX
+        # note that dJ/dX is dJ/dA for the previous layer (since this layer's input X is the previous layer's A)
+        
 
 ###############################################################################
 
@@ -187,7 +230,10 @@ class NN:
         
         self.J = cost_function # cost_function(Y, Ypred)
         # obs.: cost_function.derivative is the derivative of J w.r.t. the last layer's activation values [dJ/dYpred]
-        #       Ypred == self.layers[-1].A, thus self.J.derivative is the input (dA) for the last layer's backprop
+        #       Ypred == self.layers[-1].A, thus [dJ/dYpred == dJ/dA^L]
+        #
+        #       cost_function.delta is the derivative of J w.r.t. the last layer's Z values [dJ/dZ^L]
+        #       Z^L == self.layers[-1].Z, thus [dJ/dZ^L == dJ/dA^L . dA^L/dZ^L == dJ/dYpred . dYpred/dZ^L]
         
         self.optimizer = optimizer # obs.: the learning rate is set on the optimizer object
         
@@ -235,10 +281,15 @@ class NN:
         assert(X.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
         assert(Y.shape[1] == self.layers[-1].output_size)
         
-        cost_wrt_Ypred = self.J.derivative(Y, Ypred) # [dJ/dYpred]
-        dA = self.layers[-1].backprop(cost_wrt_Ypred)
-        for l in reversed(range(1, len(self.layers) - 1)): # we don't do backprop on the input layer
-            dA = self.layers[l].backprop(dA)
+        delta = self.J.delta(self.layers[-1].g) # delta^L == [dJ/dZ^L]
+        self.layers[-1].backprop(dZ=delta)
+        for l in reversed(range(1, len(self.layers) - 1)):
+            # [dJ/dZ^l == dJ/dA^l . dA^l/dZ^l], note that dJ/dA^l is dJ/dX^{l+1}
+            delta = self.layers[l+1].dX * self.layers[l].g.derivative(self.Z) # delta^l == [dJ/dZ^l]
+            self.layers[l].backprop(dZ=delta)
+        
+        # obs.: we don't backpropagate the input layer since we 
+        #       manually set it's activation values A to the network's input X
     
     def __shuffle_X_Y(self, X, Y):
         m = X.shape[0] # == Y.shape[0]
@@ -276,7 +327,7 @@ class NN:
 
         return cost, accuracy
     
-    # trainning and validation data
+    # training and validation data
     def train(self, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True):
         ''' X.shape == (n_training_samples, self.layers[0].input_size)
             Y.shape == (n_training_samples, self.layers[-1].output_size)
