@@ -49,7 +49,7 @@ class SoftMax(ActivationFunction):
 
 class CostFunction:
     ''' A CostFunction is applied to Y (the target values) and Ypred (the predicted values) to get a scalar output
-        Its derivative w.r.t. Ypred also expects Y and Ypred, but returns tensor (n_examples, last_layer_output_size)
+        Its derivative w.r.t. Ypred also expects Y and Ypred, but returns a tensor of shape (n_examples, last_layer_output_size)
         
         obs.: Ypred is the last layer's activation values: last_layer.A == last_layer.g(last.layer.Z), 
               i.e. last_layer is the output layer of the network
@@ -97,7 +97,7 @@ class SoftmaxCrossEntropy(CostFunction):
     def deltaL(self, Y, Ypred, activation_function, Z):
         if isinstance(activation_function, Linear):
             # Linear.derivative(Z) is a matrix of ones, so 
-            # calling it doesn't change the returned value (it'd only take longer)
+            # calling it doesn't change the returned value
             return self.derivative(Y, Ypred) # (SoftMax(Z) - Y) / m
         else:
             return super().deltaL(Y, Ypred, activation_function, Z)
@@ -127,12 +127,14 @@ class Layer:
         Z.shape == (n_examples, output_size)
         W.shape == (input_size, output_size)
         b.shape == (output_size, )
+        X.shape == (n_examples, input_size)
         obs.:
             input_size == prev_layer.output_size
             output_size == next_layer.input_size
     '''
     def __init__(self, output_size, activation_function):
         if activation_function != None:
+            # obs.: the activation_function should only be None for the network's input layer
             assert(isinstance(activation_function, ActivationFunction)), "Invalid object type for activation_function"
         
         self.input_size = None
@@ -147,6 +149,7 @@ class Layer:
         
         # output value of the previous layer
         self.X = None # == prev_layer.A
+        self.dX = None
         
         # parameters (weights and biases)
         self.W = None
@@ -216,9 +219,9 @@ class Layer:
         # (input_size, output_size) = (input_size, n_examples)  @ (n_examples, output_size)
         # (output_size, )           = (n_examples, output_size).sum(axis=0)
         # (n_examples, input_size)  = (n_examples, output_size) @ (output_size, input_size), input_size==prev_layer.output_size
-        self.dW = (self.X).T @ dZ           # [dJ/dW = dJ/dZ . dZ/dX]
-        self.db = dZ.sum(axis=0)            # [dJ/db = dJ/dZ . dZ/db]
-        self.dX = dZ @ (self.W).T           # [dJ/dX = dJ/dZ . dZ/dX]
+        self.dW = (self.X).T @ dZ # [dJ/dW = dJ/dZ . dZ/dX]
+        self.db = dZ.sum(axis=0)  # [dJ/db = dJ/dZ . dZ/db]
+        self.dX = dZ @ (self.W).T # [dJ/dX = dJ/dZ . dZ/dX]
         return self.dX
         # note that dJ/dX is dJ/dA for the previous layer (since this layer's input X is the previous layer's A)
         
@@ -282,6 +285,7 @@ class NN:
         assert(X.shape[0] == Y.shape[0])
         assert(X.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
         assert(Y.shape[1] == self.layers[-1].output_size)
+        assert(Ypred.shape == Y.shape)
         
         cost_wrt_Ypred = self.J.derivative(Y, Ypred) # [dJ/dYpred]
         dA = self.layers[-1]._backprop(cost_wrt_Ypred)
@@ -299,6 +303,7 @@ class NN:
         assert(X.shape[0] == Y.shape[0])
         assert(X.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
         assert(Y.shape[1] == self.layers[-1].output_size)
+        assert(Ypred.shape == Y.shape)
         
         delta = self.J.deltaL(Y, Ypred, self.layers[-1].g, self.layers[-1].Z) # delta^L == [dJ/dZ^L]
         self.layers[-1].backprop(dZ=delta)
@@ -321,10 +326,6 @@ class NN:
         if shuffled:
             X, Y = self.__shuffle_X_Y(X, Y)
         return zip(np.array_split(X, n_batches), np.array_split(Y, n_batches))
-        # for i in range(n_batches):
-        #     yield (X[batch_size*i : batch_size*(i+1)],
-        #            Y[batch_size*i : batch_size*(i+1)])
-        # return
     
     # test data
     def evaluate(self, X_test, Y_test):
