@@ -263,9 +263,7 @@ class NN:
         return activation # network's output (Ypred)
     
     def feedforward(self, X):
-        ''' X.shape     == (n_examples, self.layers[0].input_size)
-            Ypred.shape == (n_examples, self.layers[-1].output_size)
-        '''
+        ''' X.shape     == (n_examples, self.layers[0].input_size) '''
         assert(X.shape[1] == self.layers[0].output_size) # self.layers[0].input_size == self.layers[0].output_size
         self.layers[0].A = X # input
         for l in range(1, len(self.layers)):
@@ -337,7 +335,7 @@ class NN:
         assert(Y_test.shape[1] == self.layers[-1].output_size)
         
         # loss/cost value for the training set
-        Ypred = self.feedforward(X_test)
+        Ypred = self.predict(X_test)
         cost = self.J(Y_test, Ypred)
         
         # calculates the values not as one-hot encoded row vectors
@@ -394,7 +392,7 @@ class NN:
                 else:
                     self.backprop(batch_X, batch_Y, batch_Ypred)
                 
-                # updates each layer's parameters (i.e. weights and biases) with gradient descent
+                # updates each layer's parameters (i.e. weights and biases) with some flavor of gradient descent
                 self.optimizer.update(self.layers)
                 
                 if verbose:

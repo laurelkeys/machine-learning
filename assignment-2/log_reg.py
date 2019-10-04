@@ -68,64 +68,22 @@ def train_NN(nn, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True, use_old
         print(f"{k}: {v}")
     print("")
 
-n_epochs = 9
-batch_size = 1250
+n_epochs = 6
+batch_size = 80
 learning_rate = 1e-4
 
-print("output Linear, cost SoftmaxCrossEntropy (new backprop)")
+softmax_regressor = NN(
+    cost_function=CrossEntropy(),
+    optimizer=GradientDescent(learning_rate),
+    weight_initialization='xavier',
+    layers=[
+        Layer(3072, None), Layer(10, SoftMax())
+    ])
+
 train_NN(
     X=X, X_val=X_val,
     Y=Y, Y_val=Y_val,
     n_epochs=n_epochs,
     batch_size=batch_size,
-    nn=NN(cost_function=SoftmaxCrossEntropy(),
-          optimizer=GradientDescent(learning_rate),
-          weight_initialization='xavier',
-          layers=[Layer(3072, None), Layer(10, Linear())])
+    nn=softmax_regressor
 )
-
-print("output Linear, cost SoftmaxCrossEntropy (old backprop)")
-train_NN(
-    use_old_backprop=True,
-    X=X, X_val=X_val,
-    Y=Y, Y_val=Y_val,
-    n_epochs=n_epochs,
-    batch_size=batch_size,
-    nn=NN(cost_function=SoftmaxCrossEntropy(),
-          optimizer=GradientDescent(learning_rate),
-          weight_initialization='xavier',
-          layers=[Layer(3072, None), Layer(10, Linear())])
-)
-
-print("output SoftMax, cost CrossEntropy (new backprop)")
-train_NN(
-    X=X, X_val=X_val,
-    Y=Y, Y_val=Y_val,
-    n_epochs=n_epochs,
-    batch_size=batch_size,
-    nn=NN(cost_function=CrossEntropy(),
-          optimizer=GradientDescent(learning_rate),
-          weight_initialization='xavier',
-          layers=[Layer(3072, None), Layer(10, SoftMax())])
-)
-
-print("output SoftMax, cost CrossEntropy (old backprop)")
-train_NN(
-    use_old_backprop=True,
-    X=X, X_val=X_val,
-    Y=Y, Y_val=Y_val,
-    n_epochs=n_epochs,
-    batch_size=batch_size,
-    nn=NN(cost_function=CrossEntropy(),
-          optimizer=GradientDescent(learning_rate),
-          weight_initialization='xavier',
-          layers=[Layer(3072, None), Layer(10, SoftMax())])
-)
-
-# nn_log_reg = NN(
-#     cost_function=CrossEntropy(),
-#     optimizer=GradientDescent(learning_rate),
-#     weight_initialization='xavier',
-#     layers=[
-#         Layer(3072, None), Layer(10, SoftMax())
-#     ])
