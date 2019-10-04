@@ -50,46 +50,82 @@ Y_val = onehot_encode(ys_val)
 
 ###############################################################################
 
-"""
-nn_log_reg = NN(
-    cost_function=CrossEntropy(),
-    optimizer=GradientDescent(learning_rate=1e-4),
-    weight_initialization='xavier',
-    layers=[
-        Layer(3072, None), Layer(10, SoftMax())
-    ])
+def train_NN(nn, X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True, use_old_backprop=False):
+    start = time()
+    print("Starting to train...")
+    nn.train(
+        X, Y,
+        X_val, Y_val,
+        n_epochs,
+        batch_size,
+        verbose,
+        use_old_backprop
+    )
+    end = time()
+    print(f"\nDone.\nTraining took {(end - start):.2f}s")
+    print(f"\nTrain history:")
+    for k, v in nn.history.items():
+        print(f"{k}: {v}")
+    print("")
 
-nn_log_reg.train(
-    X[:2*1250], Y[:2*1250],
-    X_val, Y_val,
-    n_epochs=2,
-    batch_size=1250//2
-) # X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True
+n_epochs = 9
+batch_size = 1250
+learning_rate = 1e-4
 
-print(nn_log_reg.history)
-"""
+print("output Linear, cost SoftmaxCrossEntropy (new backprop)")
+train_NN(
+    X=X, X_val=X_val,
+    Y=Y, Y_val=Y_val,
+    n_epochs=n_epochs,
+    batch_size=batch_size,
+    nn=NN(cost_function=SoftmaxCrossEntropy(),
+          optimizer=GradientDescent(learning_rate),
+          weight_initialization='xavier',
+          layers=[Layer(3072, None), Layer(10, Linear())])
+)
 
-nn2_log_reg = NN(
-    cost_function=SoftmaxCrossEntropy(),
-    optimizer=GradientDescent(learning_rate=1e-4),
-    weight_initialization='xavier',
-    layers=[
-        Layer(3072, None), Layer(10, Linear())
-    ])
+print("output Linear, cost SoftmaxCrossEntropy (old backprop)")
+train_NN(
+    use_old_backprop=True,
+    X=X, X_val=X_val,
+    Y=Y, Y_val=Y_val,
+    n_epochs=n_epochs,
+    batch_size=batch_size,
+    nn=NN(cost_function=SoftmaxCrossEntropy(),
+          optimizer=GradientDescent(learning_rate),
+          weight_initialization='xavier',
+          layers=[Layer(3072, None), Layer(10, Linear())])
+)
 
-start = time()
-print("Starting to train...")
-nn2_log_reg.train(
-    X[:4*2048], Y[:4*2048],
-    X_val, Y_val,
-    n_epochs=2,
-    batch_size=1024
-) # X, Y, X_val, Y_val, n_epochs, batch_size, verbose=True
-end = time()
+print("output SoftMax, cost CrossEntropy (new backprop)")
+train_NN(
+    X=X, X_val=X_val,
+    Y=Y, Y_val=Y_val,
+    n_epochs=n_epochs,
+    batch_size=batch_size,
+    nn=NN(cost_function=CrossEntropy(),
+          optimizer=GradientDescent(learning_rate),
+          weight_initialization='xavier',
+          layers=[Layer(3072, None), Layer(10, SoftMax())])
+)
 
-print(f"\nDone. Training took {end - start}s")
+print("output SoftMax, cost CrossEntropy (old backprop)")
+train_NN(
+    use_old_backprop=True,
+    X=X, X_val=X_val,
+    Y=Y, Y_val=Y_val,
+    n_epochs=n_epochs,
+    batch_size=batch_size,
+    nn=NN(cost_function=CrossEntropy(),
+          optimizer=GradientDescent(learning_rate),
+          weight_initialization='xavier',
+          layers=[Layer(3072, None), Layer(10, SoftMax())])
+)
 
-print(f"\nTrain history:")
-for k, v in nn2_log_reg.history.items():
-    print(f"{k}: {v}")
-
+# nn_log_reg = NN(
+#     cost_function=CrossEntropy(),
+#     optimizer=GradientDescent(learning_rate),
+#     weight_initialization='xavier',
+#     layers=[
+#         Layer(3072, None), Layer(10, SoftMax())
+#     ])
