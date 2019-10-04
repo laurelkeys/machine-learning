@@ -71,13 +71,13 @@ n_epochs = 6
 batch_size = 80
 learning_rate = 1e-4
 
-# softmax_regressor = NN(
-#     cost_function=CrossEntropy(),
-#     optimizer=GradientDescent(learning_rate),
-#     weight_initialization='xavier',
-#     layers=[
-#         Layer(3072, None), Layer(10, SoftMax())
-#     ])
+softmax_regressor = NN(
+    cost_function=CrossEntropy(),
+    optimizer=GradientDescent(learning_rate),
+    weight_initialization='xavier',
+    layers=[
+        Layer(3072, None), Layer(10, SoftMax())
+    ])
 
 hidden_layer_size = 200
 

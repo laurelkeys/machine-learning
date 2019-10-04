@@ -59,13 +59,12 @@ class CostFunction:
     def derivative(self, Y, Ypred):
         ''' Y.shape == Ypred.shape == (n_examples, last_layer_output_size) '''
         raise NotImplementedError # [dJ/dYpred == dJ/dA^L]
-    def deltaL(self, Y, Ypred, activation_function, Z):
+    def deltaL(self, Y, Ypred, activation_function):
         ''' Y.shape == Ypred.shape == (n_examples, last_layer_output_size) 
 
             activation_function should be the last layer's g function, thus Ypred == activation_function(Z)
             and the value returned is the delta for the output layer of the network (delta^L == dJ/dZ^L)
         '''
-        # FIXME remove Z from parameters (we were wrongly calling activation_function.derivative(Z))
         return self.derivative(Y, Ypred) * activation_function.derivative(Ypred) # [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L]
         # obs.: Ypred == A^L == g(Z^L), thus dYpred/dZ^L == dA^L/dZ^L == g'(Z^L)
         #       [dJ/dZ^L == dJ/dYpred . dYpred/dZ^L == dJ/dA^L . dA^L/dZ^L]
@@ -76,13 +75,13 @@ class CrossEntropy(CostFunction):
     def derivative(self, Y, Ypred, eps=1e-9):
         m = Ypred.shape[0]
         return - (Y / (Ypred+eps)) / m
-    def deltaL(self, Y, Ypred, activation_function, Z):
+    def deltaL(self, Y, Ypred, activation_function):
         if isinstance(activation_function, SoftMax):
             m = Ypred.shape[0]
             # numerically stable
             return (Ypred - Y) / m # (SoftMax(Z) - Y) / m
         else:
-            return super().deltaL(Y, Ypred, activation_function, Z)
+            return super().deltaL(Y, Ypred, activation_function)
 
 class SoftmaxCrossEntropy(CostFunction):
     def __call__(self, Y, Ypred):
@@ -94,13 +93,13 @@ class SoftmaxCrossEntropy(CostFunction):
         Softmax = exp / np.sum(exp, axis=1, keepdims=True)
         m = Softmax.shape[0]
         return (Softmax - Y) / m
-    def deltaL(self, Y, Ypred, activation_function, Z):
+    def deltaL(self, Y, Ypred, activation_function):
         if isinstance(activation_function, Linear):
             # Linear.derivative(Z) is a matrix of ones, so 
             # calling it doesn't change the returned value
             return self.derivative(Y, Ypred) # (SoftMax(Z) - Y) / m
         else:
-            return super().deltaL(Y, Ypred, activation_function, Z)
+            return super().deltaL(Y, Ypred, activation_function)
 
 ###############################################################################
 
@@ -266,7 +265,7 @@ class NN:
         assert(Y.shape[1] == self.layers[-1].output_size)
         assert(Ypred.shape == Y.shape)
         
-        delta = self.J.deltaL(Y, Ypred, self.layers[-1].g, self.layers[-1].Z) # delta^L == [dJ/dZ^L]
+        delta = self.J.deltaL(Y, Ypred, self.layers[-1].g) # delta^L == [dJ/dZ^L]
         self.layers[-1].backprop(dZ=delta)
         for l in reversed(range(1, len(self.layers) - 1)):
             # [dJ/dZ^l == dJ/dA^l . dA^l/dZ^l], note that dJ/dA^l is dJ/dX^{l+1}
