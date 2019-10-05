@@ -2,3 +2,6 @@
 Assignments from Machine Learning (MC886)
 
 - Assignment 1: **Linear Regression** [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-1/Assignment1.ipynb)] [[report 📝](https://github.com/laurelkeys/machine-learning/blob/master/reports/MC886___Assignment_1.pdf)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_01.pdf)]
+
+- Assignment 2: **Softmax Regression and Neural Networks** [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-2/Assignment2.ipynb)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_02.pdf)]
+
