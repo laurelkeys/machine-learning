@@ -15,7 +15,7 @@ Following one of the (⭐⭐⭐) problems presented by [OpenAI](https://openai.c
 - Gym
   - [Getting Started with Gym](https://gym.openai.com/docs/)
 - Stable baselines
-  - [[GitHub](https://github.com/hill-a/stable-baselines/tree/master)] [[Docs](https://stable-baselines.readthedocs.io/en/master/)]
+  - [[GitHub](https://github.com/hill-a/stable-baselines/tree/master)] [[Docs](https://stable-baselines.readthedocs.io/en/master/)] [[Examples](https://github.com/hill-a/stable-baselines/blob/master/docs/guide/examples.rst)]
   - [Stable Baselines: a Fork of OpenAI Baselines — Reinforcement Learning Made Easy](https://towardsdatascience.com/stable-baselines-a-fork-of-openai-baselines-reinforcement-learning-made-easy-df87c4b2fc82)
 - Attention and the Transformer model
   - TensorFlow's tutorial: [Transformer model for language understanding](https://www.tensorflow.org/tutorials/text/transformer)
@@ -24,5 +24,6 @@ Following one of the (⭐⭐⭐) problems presented by [OpenAI](https://openai.c
   - Lilian Weng's blog post: [Attention? Attention!](https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html)
 - Reinforcement learning
   - Lilian Weng's blog post: [Policy Gradient Algorithms](https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html)
+  - Andrej Karpathy's blog post: [Deep Reinforcement Learning: Pong from Pixels](http://karpathy.github.io/2016/05/31/rl/)
   - [David Silver](http://www0.cs.ucl.ac.uk/staff/d.silver/web/Teaching.html)'s [course](https://www.youtube.com/watch?v=2pWv7GOvuf0&list=PLqYmG7hTraZDM-OYHWgPebj2MfCFzFObQ)
   - [OpenAI Spinning Up](https://spinningup.openai.com/en/latest/)
