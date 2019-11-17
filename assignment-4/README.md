@@ -18,9 +18,11 @@ Following one of the (⭐⭐⭐) problems presented by [OpenAI](https://openai.c
   - [[GitHub](https://github.com/hill-a/stable-baselines/tree/master)] [[Docs](https://stable-baselines.readthedocs.io/en/master/)] [[Examples](https://github.com/hill-a/stable-baselines/blob/master/docs/guide/examples.rst)]
   - [Stable Baselines: a Fork of OpenAI Baselines — Reinforcement Learning Made Easy](https://towardsdatascience.com/stable-baselines-a-fork-of-openai-baselines-reinforcement-learning-made-easy-df87c4b2fc82)
 - Attention and the Transformer model
-  - TensorFlow's tutorial: [Transformer model for language understanding](https://www.tensorflow.org/tutorials/text/transformer)
-  - Suggested (implemented) models for image generation on [tensor2tensor](https://github.com/tensorflow/tensor2tensor#image-generation)
-  - [Image Transformer](https://ai.google/research/pubs/pub46840/) and [Sparse Transformer](https://openai.com/blog/sparse-transformer/)
+  - TensorFlow's tutorial: 
+    - [Neural machine translation with attention](https://www.tensorflow.org/tutorials/text/nmt_with_attention)
+    - [Image captioning with visual attention](https://www.tensorflow.org/tutorials/text/image_captioning) 🤗
+    - [Transformer model for language understanding](https://www.tensorflow.org/tutorials/text/transformer)
+  - [Sparse Transformer](https://openai.com/blog/sparse-transformer/) and [Image Transformer](https://ai.google/research/pubs/pub46840/) (implemented on [tensor2tensor](https://github.com/tensorflow/tensor2tensor#image-generation))
   - Lilian Weng's blog post: [Attention? Attention!](https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html)
 - Reinforcement learning
   - Lilian Weng's blog post: [Policy Gradient Algorithms](https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html)
