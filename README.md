@@ -7,3 +7,5 @@ Assignments from Machine Learning (MC886)
 
 - Assignment 3: **Unsupervised Learning and Dimensionality Reduction** [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-3/Assignment3.ipynb)] [[report 📝](https://github.com/laurelkeys/machine-learning/blob/master/reports/MC886___Assignment_3.pdf)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_03.pdf)]
 
+- Assignment 4: **Transfer Learning Between Different Games via Generative Models** [[WIP 🚧](https://github.com/laurelkeys/machine-learning/blob/master/assignment-4/)]
+

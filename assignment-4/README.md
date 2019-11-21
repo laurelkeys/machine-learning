@@ -20,7 +20,7 @@ Following one of the (⭐⭐⭐) problems presented by [OpenAI](https://openai.c
 - Attention and the Transformer model
   - TensorFlow's tutorial: 
     - [Neural machine translation with attention](https://www.tensorflow.org/tutorials/text/nmt_with_attention)
-    - [Image captioning with visual attention](https://www.tensorflow.org/tutorials/text/image_captioning) 🤗
+    - [Image captioning with visual attention](https://www.tensorflow.org/tutorials/text/image_captioning)
     - [Transformer model for language understanding](https://www.tensorflow.org/tutorials/text/transformer)
   - [Sparse Transformer](https://openai.com/blog/sparse-transformer/) and [Image Transformer](https://ai.google/research/pubs/pub46840/) (implemented on [tensor2tensor](https://github.com/tensorflow/tensor2tensor#image-generation))
   - Lilian Weng's blog post: [Attention? Attention!](https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html)
