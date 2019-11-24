@@ -24,6 +24,7 @@ Following one of the (⭐⭐⭐) problems presented by [OpenAI](https://openai.c
     - [Transformer model for language understanding](https://www.tensorflow.org/tutorials/text/transformer)
   - [Sparse Transformer](https://openai.com/blog/sparse-transformer/) and [Image Transformer](https://ai.google/research/pubs/pub46840/) (implemented on [tensor2tensor](https://github.com/tensorflow/tensor2tensor#image-generation))
   - Lilian Weng's blog post: [Attention? Attention!](https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html)
+  - Alexander Rush's blog post: [The Annotated Transformer](https://nlp.seas.harvard.edu/2018/04/03/attention.html)
 - Reinforcement learning
   - Lilian Weng's blog post: [Policy Gradient Algorithms](https://lilianweng.github.io/lil-log/2018/04/08/policy-gradient-algorithms.html)
   - Andrej Karpathy's blog post: [Deep Reinforcement Learning: Pong from Pixels](http://karpathy.github.io/2016/05/31/rl/)
