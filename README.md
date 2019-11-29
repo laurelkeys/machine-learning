@@ -1,14 +1,15 @@
 # machine-learning
 Assignments from Machine Learning (MC886)  
 
-- Assignment 1: **Linear Regression**
+- Assignment 1: **Linear Regression**  
 [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-1/Assignment1.ipynb)] [[report 📝](https://github.com/laurelkeys/machine-learning/blob/master/reports/MC886___Assignment_1.pdf)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_01.pdf)]  
 
-- Assignment 2: **Softmax Regression and Neural Networks**
+- Assignment 2: **Softmax Regression and Neural Networks**  
 [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-2/Assignment2.ipynb)] [[report 📝](https://github.com/laurelkeys/machine-learning/blob/master/reports/MC886___Assignment_2.pdf)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_02.pdf)]
 
-- Assignment 3: **Unsupervised Learning and Dimensionality Reduction**
+- Assignment 3: **Unsupervised Learning and Dimensionality Reduction**  
 [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-3/Assignment3.ipynb)] [[report 📝](https://github.com/laurelkeys/machine-learning/blob/master/reports/MC886___Assignment_3.pdf)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_03.pdf)]  
 
-- Final Project: **Transfer Learning Between Different Games via Generative Models**
-[[WIP 🚧](https://github.com/laurelkeys/machine-learning/blob/master/assignment-4/)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_project3.pdf)]
+- Final Project: **Transfer Learning Between Different Games via Generative Models**  
+[[WIP 🚧](https://github.com/laurelkeys/machine-learning/blob/master/assignment-4/)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_project3.pdf)]  
+> [![Atari Agent Trajectories for State-to-Action Mappings](https://i.imgur.com/AHdVXRJ.png)](https://www.youtube.com/watch?v=xEhxhXWgzzs "Atari Agent Trajectories for State-to-Action Mappings")
