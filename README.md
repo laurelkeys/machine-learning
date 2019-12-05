@@ -10,6 +10,6 @@ Assignments from Machine Learning (MC886)
 - Assignment 3: **Unsupervised Learning and Dimensionality Reduction**  
 [[notebook 📒](https://github.com/laurelkeys/machine-learning/blob/master/assignment-3/Assignment3.ipynb)] [[report 📝](https://github.com/laurelkeys/machine-learning/blob/master/reports/MC886___Assignment_3.pdf)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_assignment_03.pdf)]  
 
-- Final Project: **Transfer Learning Between Different Games via Generative Models**  
+- Final Project: **Atari Agent Trajectories for State-to-Action Mappings**  
 [[WIP 🚧](https://github.com/laurelkeys/machine-learning/blob/master/assignment-4/)] [[specification📄](https://github.com/laurelkeys/machine-learning/blob/master/reports/2019s2_mc886_project3.pdf)]  
 > [![Atari Agent Trajectories for State-to-Action Mappings](https://i.imgur.com/AHdVXRJ.png)](https://www.youtube.com/watch?v=xEhxhXWgzzs "Atari Agent Trajectories for State-to-Action Mappings")
